@@ -1,20 +1,14 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'package:flutter/material.dart';
-
+import 'package:lottie/lottie.dart';
 import 'package:get/get.dart';
 import 'package:hexcolor/hexcolor.dart';
-import 'package:lottie/lottie.dart';
-
 import '../controllers/login_controller.dart';
 
 class LoginView extends GetView<LoginController> {
   const LoginView({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     LoginController controller = Get.put(LoginController());
-
     return Scaffold(
       backgroundColor: HexColor('#feeee8'),
       body: SingleChildScrollView(
