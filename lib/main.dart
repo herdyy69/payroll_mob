@@ -5,6 +5,8 @@ import 'package:get_storage/get_storage.dart';
 
 import 'app/routes/app_pages.dart';
 
+import 'dart:io';
+
 void main() async {
   await GetStorage.init();
   runApp(
@@ -15,4 +17,14 @@ void main() async {
       getPages: AppPages.routes,
     ),
   );
+}
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    HttpClient client = super.createHttpClient(context);
+    client.badCertificateCallback =
+        (X509Certificate cert, String host, int port) => true;
+    return client;
+  }
 }

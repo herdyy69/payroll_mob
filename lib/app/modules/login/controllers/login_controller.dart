@@ -32,19 +32,20 @@ class LoginController extends GetxController {
 
   void loginNow() async {
     try {
-      final response = await client.post(
-          Uri.https('demo-elearning.smkassalaambandung.sch.id', 'api/login'),
-          body: {
-            'email': emailController.text,
-            'password': passwordController.text,
-          });
+      final response = await client
+          .post(Uri.parse('http://127.0.0.1:8000/api/login'), body: {
+        'email': emailController.text,
+        'password': passwordController.text,
+      });
 
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
-        if (jsonResponse['success'] == true) {
-          authToken.write('token', jsonResponse['access_token']);
-          authToken.write('full_name', jsonResponse['full_name']);
-          Get.offAll(() => DashboardView());
+        if (jsonResponse['token'] != null) {
+          authToken.write('token', jsonResponse['token']);
+          authToken.write('full_name', jsonResponse['user']['name']);
+          authToken.write('email', jsonResponse['user']['email']);
+          authToken.write('role', jsonResponse['user']['username']);
+          Get.offAll(() => const DashboardView());
         } else {
           Get.snackbar(
             'Error',

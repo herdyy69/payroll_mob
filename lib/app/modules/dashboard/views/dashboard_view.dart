@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:lottie/lottie.dart';
+import 'package:payroll_mob/app/data/karyawan_res.dart';
+import 'package:payroll_mob/app/data/laporan_res.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../data/headline_response.dart';
@@ -24,7 +26,7 @@ class DashboardView extends GetView<DashboardController> {
     return SafeArea(
       // Widget SafeArea menempatkan semua konten widget ke dalam area yang aman (safe area) dari layar.
       child: DefaultTabController(
-        length: 5,
+        length: 3,
         // Widget DefaultTabController digunakan untuk mengatur tab di aplikasi.
         child: Scaffold(
           floatingActionButton: FloatingActionButton(
@@ -45,28 +47,30 @@ class DashboardView extends GetView<DashboardController> {
               children: [
                 ListTile(
                   // Widget ListTile digunakan untuk menampilkan tampilan list sederhana.
-                  title: const Text(
-                    "Hallo!",
+                  title: Text(
+                    auth.read('full_name').toString(),
+
                     textAlign: TextAlign.end,
                     // Properti textAlign digunakan untuk menentukan perataan teks.
                   ),
                   subtitle: Text(
-                    auth.read('full_name').toString(),
+                    auth.read('email').toString(),
                     textAlign: TextAlign.end,
                   ),
                   trailing: Container(
-                    // Widget Container digunakan untuk mengatur tampilan konten dalam kotak.
-                    margin: const EdgeInsets.only(right: 10),
-                    // Properti margin digunakan untuk menentukan jarak dari tepi kontainer ke tepi widget yang di dalamnya.
-                    width: 50.0,
-                    height: 50.0,
-                    child: Lottie.network(
-                      // Widget Lottie.network digunakan untuk menampilkan animasi Lottie dari suatu URL.
-                      'https://gist.githubusercontent.com/olipiskandar/2095343e6b34255dcfb042166c4a3283/raw/d76e1121a2124640481edcf6e7712130304d6236/praujikom_kucing.json',
-                      fit: BoxFit.cover,
-                      // Properti fit digunakan untuk menyesuaikan ukuran konten agar sesuai dengan kontainer.
-                    ),
-                  ),
+                      // Widget Container digunakan untuk mengatur tampilan konten dalam kotak.
+                      margin: const EdgeInsets.only(right: 10),
+                      // Properti margin digunakan untuk menentukan jarak dari tepi kontainer ke tepi widget yang di dalamnya.
+                      width: 50.0,
+                      height: 50.0,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(
+                            100), // Set the border radius to a large value to make it fully rounded
+                        child: Image.network(
+                          'https://i.ibb.co/ccZBJ2y/Klwe0u-AK-400x400.png',
+                          // fit: BoxFit.cover,
+                        ),
+                      )),
                 ),
                 const Align(
                   // Widget Align digunakan untuk menempatkan widget pada posisi tertentu di dalam widget induk.
@@ -84,11 +88,9 @@ class DashboardView extends GetView<DashboardController> {
                     // Properti indicatorColor digunakan untuk menentukan warna indikator tab yang dipilih.
                     tabs: [
                       // Properti tabs digunakan untuk menentukan teks yang akan ditampilkan pada masing-masing tab.
-                      Tab(text: "Headline"),
-                      Tab(text: "Teknologi"),
-                      Tab(text: "Olahraga"),
-                      Tab(text: "Hiburan"),
-                      Tab(text: "Portfolio"),
+                      Tab(text: "Karyawan"),
+                      Tab(text: "Riwayat Laporan"),
+                      Tab(text: "Tentang Saya"),
                     ],
                   ),
                 ),
@@ -99,10 +101,8 @@ class DashboardView extends GetView<DashboardController> {
             // Widget TabBarView digunakan untuk menampilkan konten yang terkait dengan masing-masing tab.
             children: [
               // Properti children digunakan untuk menentukan konten yang akan ditampilkan pada masing-masing tab.
-              headline(controller, scrollController),
-              technology(controller, scrollController),
-              sports(controller, scrollController),
-              entertainment(controller, scrollController),
+              karyawan(controller, scrollController),
+              laporan(controller, scrollController),
               portfolio(controller, scrollController),
             ],
           ),
@@ -204,357 +204,228 @@ class DashboardView extends GetView<DashboardController> {
       ),
     );
   }
-}
 
-// Function untuk menampilkan daftar headline berita dalam bentuk ListView.Builder dengan menggunakan data yang didapatkan dari future yang dikembalikan oleh controller
-FutureBuilder<HeadlineResponse> headline(
-    DashboardController controller, ScrollController scrollController) {
-  return FutureBuilder<HeadlineResponse>(
-    // Mendapatkan future data headline dari controller
-    future: controller.getHeadline(),
-    builder: (context, snapshot) {
-      // Jika koneksi masih dalam keadaan waiting/tunggu, tampilkan widget Lottie loading
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return Center(
-          child: Lottie.network(
-            // Menggunakan animasi Lottie untuk tampilan loading
-            'https://gist.githubusercontent.com/olipiskandar/4f08ac098c81c32ebc02c55f5b11127b/raw/6e21dc500323da795e8b61b5558748b5c7885157/loading.json',
-            repeat: true,
-            width: MediaQuery.of(context).size.width / 1,
-          ),
-        );
-      }
-      // Jika tidak ada data yang diterima, tampilkan pesan "Tidak ada data"
-      if (!snapshot.hasData) {
-        return const Center(child: Text("Tidak ada data"));
-      }
-
-      // Jika data diterima, tampilkan daftar headline dalam bentuk ListView.Builder
-      return ListView.builder(
-        itemCount: snapshot.data!.data!.length,
-        controller: scrollController,
-        shrinkWrap: true,
-        itemBuilder: (context, index) {
-          // Tampilan untuk setiap item headline dalam ListView.Builder
-          return Container(
-            padding: const EdgeInsets.only(
-              top: 5,
-              left: 8,
-              right: 8,
-              bottom: 5,
+  FutureBuilder<KaryawanRes> karyawan(
+      DashboardController controller, ScrollController scrollController) {
+    return FutureBuilder<KaryawanRes>(
+      future: controller.getKaryawan(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: Lottie.network(
+              'https://gist.githubusercontent.com/olipiskandar/4f08ac098c81c32ebc02c55f5b11127b/raw/6e21dc500323da795e8b61b5558748b5c7885157/loading.json',
+              width: 100,
+              height: 100,
             ),
-            height: 110,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Widget untuk menampilkan gambar headline dengan menggunakan url gambar dari data yang diterima
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: Image.network(
-                    snapshot.data!.data![index].urlToImage.toString(),
-                    height: 130,
-                    width: 130,
-                    fit: BoxFit.cover,
+          );
+        } else if (snapshot.hasError) {
+          return Center(
+            child: Text('Error'),
+          );
+        } else {
+          return ListView.builder(
+            controller: scrollController,
+            itemCount: snapshot.data!.data!.length,
+            itemBuilder: (context, index) {
+              return Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(10),
+                  ),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Colors.black,
+                      width: 1,
+                    ),
+                    top: BorderSide(
+                      color: Colors.black,
+                      width: 1,
+                    ),
+                    left: BorderSide(
+                      color: Colors.black,
+                      width: 1,
+                    ),
+                    right: BorderSide(
+                      color: Colors.black,
+                      width: 1,
+                    ),
                   ),
                 ),
-                const SizedBox(
-                  width: 10,
+                padding: const EdgeInsets.only(
+                  top: 5,
+                  left: 8,
+                  right: 8,
+                  bottom: 5,
                 ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                margin: const EdgeInsets.only(
+                  top: 5,
+                  left: 8,
+                  right: 8,
+                  bottom: 5,
+                ),
+                child: ListTile(
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      // Widget untuk menampilkan judul headline dengan menggunakan data yang diterima
                       Text(
-                        snapshot.data!.data![index].title.toString(),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
-                      ),
-                      const SizedBox(
-                        height: 2,
-                      ),
-                      // Widget untuk menampilkan informasi author dan sumber headline dengan menggunakan data yang diterima
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                              'Author : ${snapshot.data!.data![index].author}'),
-                          Text('Sumber :${snapshot.data!.data![index].name}'),
-                        ],
+                          maxLines: 1,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          snapshot.data!.data![index].namaPegawai.toString()),
+                      Container(
+                        padding: const EdgeInsets.all(7),
+                        decoration: BoxDecoration(
+                          color: Colors.grey,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        margin: const EdgeInsets.only(left: 10, top: 3),
+                        child: Text(
+                            style: const TextStyle(
+                              fontSize: 12,
+                            ),
+                            snapshot.data!.data![index].pegawai.toString()),
                       ),
                     ],
                   ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(snapshot.data!.data![index].nik.toString()),
+                          const SizedBox(width: 10),
+                        ],
+                      ),
+                      Text(
+                          style: const TextStyle(
+                            fontSize: 12,
+                          ),
+                          snapshot.data!.data![index].jabatanId.toString() +
+                              ' - ' +
+                              snapshot.data!.data![index].statusId.toString()),
+                    ],
+                  ),
+                  leading: CircleAvatar(
+                    backgroundImage: NetworkImage('http://localhost:8000/' +
+                        snapshot.data!.data![index].foto.toString()),
+                  ),
                 ),
-              ],
-            ),
+              );
+            },
           );
-        },
-      );
-    },
-  );
+        }
+      },
+    );
+  }
 }
 
-FutureBuilder<TechnologyResponse> technology(
+FutureBuilder<LaporanRes> laporan(
     DashboardController controller, ScrollController scrollController) {
-  return FutureBuilder<TechnologyResponse>(
-    // Mendapatkan future data headline dari controller
-    future: controller.getTechnology(),
+  return FutureBuilder<LaporanRes>(
+    future: controller.getLaporan(),
     builder: (context, snapshot) {
-      // Jika koneksi masih dalam keadaan waiting/tunggu, tampilkan widget Lottie loading
       if (snapshot.connectionState == ConnectionState.waiting) {
         return Center(
           child: Lottie.network(
-            // Menggunakan animasi Lottie untuk tampilan loading
             'https://gist.githubusercontent.com/olipiskandar/4f08ac098c81c32ebc02c55f5b11127b/raw/6e21dc500323da795e8b61b5558748b5c7885157/loading.json',
-            repeat: true,
-            width: MediaQuery.of(context).size.width / 1,
+            width: 100,
+            height: 100,
           ),
         );
-      }
-      // Jika tidak ada data yang diterima, tampilkan pesan "Tidak ada data"
-      if (!snapshot.hasData) {
-        return const Center(child: Text("Tidak ada data"));
-      }
-
-      // Jika data diterima, tampilkan daftar headline dalam bentuk ListView.Builder
-      return ListView.builder(
-        itemCount: snapshot.data!.data!.length,
-        controller: scrollController,
-        shrinkWrap: true,
-        itemBuilder: (context, index) {
-          // Tampilan untuk setiap item headline dalam ListView.Builder
-          return Container(
-            padding: const EdgeInsets.only(
-              top: 5,
-              left: 8,
-              right: 8,
-              bottom: 5,
-            ),
-            height: 110,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Widget untuk menampilkan gambar headline dengan menggunakan url gambar dari data yang diterima
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: Image.network(
-                    snapshot.data!.data![index].urlToImage.toString(),
-                    height: 130,
-                    width: 130,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Widget untuk menampilkan judul headline dengan menggunakan data yang diterima
-                      Text(
-                        snapshot.data!.data![index].title.toString(),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
-                      ),
-                      const SizedBox(
-                        height: 2,
-                      ),
-                      // Widget untuk menampilkan informasi author dan sumber headline dengan menggunakan data yang diterima
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                              'Author : ${snapshot.data!.data![index].author}'),
-                          Text('Sumber :${snapshot.data!.data![index].name}'),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    },
-  );
-}
-
-FutureBuilder<SportsResponse> sports(
-    DashboardController controller, ScrollController scrollController) {
-  return FutureBuilder<SportsResponse>(
-    // Mendapatkan future data headline dari controller
-    future: controller.getSports(),
-    builder: (context, snapshot) {
-      // Jika koneksi masih dalam keadaan waiting/tunggu, tampilkan widget Lottie loading
-      if (snapshot.connectionState == ConnectionState.waiting) {
+      } else if (snapshot.hasError) {
         return Center(
-          child: Lottie.network(
-            // Menggunakan animasi Lottie untuk tampilan loading
-            'https://gist.githubusercontent.com/olipiskandar/4f08ac098c81c32ebc02c55f5b11127b/raw/6e21dc500323da795e8b61b5558748b5c7885157/loading.json',
-            repeat: true,
-            width: MediaQuery.of(context).size.width / 1,
-          ),
+          child: Text('Error'),
+        );
+      } else {
+        return ListView.builder(
+          controller: scrollController,
+          itemCount: snapshot.data!.data!.length,
+          itemBuilder: (context, index) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.all(
+                  Radius.circular(10),
+                ),
+                border: Border(
+                  bottom: BorderSide(
+                    color: Colors.black,
+                    width: 1,
+                  ),
+                  top: BorderSide(
+                    color: Colors.black,
+                    width: 1,
+                  ),
+                  left: BorderSide(
+                    color: Colors.black,
+                    width: 1,
+                  ),
+                  right: BorderSide(
+                    color: Colors.black,
+                    width: 1,
+                  ),
+                ),
+              ),
+              padding: const EdgeInsets.only(
+                top: 5,
+                left: 8,
+                right: 8,
+                bottom: 5,
+              ),
+              margin: const EdgeInsets.only(
+                top: 5,
+                left: 8,
+                right: 8,
+                bottom: 5,
+              ),
+              child: ListTile(
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(snapshot.data!.data![index].nama.toString()),
+                    Container(
+                      padding: const EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                        color: Colors.grey,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      margin: const EdgeInsets.only(left: 10, top: 3),
+                      child: Text(
+                          style: const TextStyle(
+                            fontSize: 12,
+                          ),
+                          snapshot.data!.data![index].kodeLaporan.toString()),
+                    ),
+                  ],
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                            style: const TextStyle(
+                              fontSize: 13,
+                            ),
+                            snapshot.data!.data![index].nik.toString()),
+                        const SizedBox(width: 10),
+                      ],
+                    ),
+                    Text(
+                        style: const TextStyle(
+                          fontSize: 12,
+                        ),
+                        snapshot.data!.data![index].tanggalLaporan.toString()),
+                  ],
+                ),
+              ),
+            );
+          },
         );
       }
-      // Jika tidak ada data yang diterima, tampilkan pesan "Tidak ada data"
-      if (!snapshot.hasData) {
-        return const Center(child: Text("Tidak ada data"));
-      }
-
-      // Jika data diterima, tampilkan daftar headline dalam bentuk ListView.Builder
-      return ListView.builder(
-        itemCount: snapshot.data!.data!.length,
-        controller: scrollController,
-        shrinkWrap: true,
-        itemBuilder: (context, index) {
-          // Tampilan untuk setiap item headline dalam ListView.Builder
-          return Container(
-            padding: const EdgeInsets.only(
-              top: 5,
-              left: 8,
-              right: 8,
-              bottom: 5,
-            ),
-            height: 110,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Widget untuk menampilkan gambar headline dengan menggunakan url gambar dari data yang diterima
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: Image.network(
-                    snapshot.data!.data![index].urlToImage.toString(),
-                    height: 130,
-                    width: 130,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Widget untuk menampilkan judul headline dengan menggunakan data yang diterima
-                      Text(
-                        snapshot.data!.data![index].title.toString(),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
-                      ),
-                      const SizedBox(
-                        height: 2,
-                      ),
-                      // Widget untuk menampilkan informasi author dan sumber headline dengan menggunakan data yang diterima
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                              'Author : ${snapshot.data!.data![index].author}'),
-                          Text('Sumber :${snapshot.data!.data![index].name}'),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    },
-  );
-}
-
-FutureBuilder<EntertainmentResponse> entertainment(
-    DashboardController controller, ScrollController scrollController) {
-  return FutureBuilder<EntertainmentResponse>(
-    // Mendapatkan future data headline dari controller
-    future: controller.getEntertainment(),
-    builder: (context, snapshot) {
-      // Jika koneksi masih dalam keadaan waiting/tunggu, tampilkan widget Lottie loading
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return Center(
-          child: Lottie.network(
-            // Menggunakan animasi Lottie untuk tampilan loading
-            'https://gist.githubusercontent.com/olipiskandar/4f08ac098c81c32ebc02c55f5b11127b/raw/6e21dc500323da795e8b61b5558748b5c7885157/loading.json',
-            repeat: true,
-            width: MediaQuery.of(context).size.width / 1,
-          ),
-        );
-      }
-      // Jika tidak ada data yang diterima, tampilkan pesan "Tidak ada data"
-      if (!snapshot.hasData) {
-        return const Center(child: Text("Tidak ada data"));
-      }
-
-      // Jika data diterima, tampilkan daftar headline dalam bentuk ListView.Builder
-      return ListView.builder(
-        itemCount: snapshot.data!.data!.length,
-        controller: scrollController,
-        shrinkWrap: true,
-        itemBuilder: (context, index) {
-          // Tampilan untuk setiap item headline dalam ListView.Builder
-          return Container(
-            padding: const EdgeInsets.only(
-              top: 5,
-              left: 8,
-              right: 8,
-              bottom: 5,
-            ),
-            height: 110,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Widget untuk menampilkan gambar headline dengan menggunakan url gambar dari data yang diterima
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: Image.network(
-                    snapshot.data!.data![index].urlToImage.toString(),
-                    height: 130,
-                    width: 130,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Widget untuk menampilkan judul headline dengan menggunakan data yang diterima
-                      Text(
-                        snapshot.data!.data![index].title.toString(),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
-                      ),
-                      const SizedBox(
-                        height: 2,
-                      ),
-                      // Widget untuk menampilkan informasi author dan sumber headline dengan menggunakan data yang diterima
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                              'Author : ${snapshot.data!.data![index].author}'),
-                          Text('Sumber :${snapshot.data!.data![index].name}'),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      );
     },
   );
 }
